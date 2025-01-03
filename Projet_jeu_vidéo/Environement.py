@@ -2,7 +2,9 @@ import pygame as py
 import math
 import pickle
 import os
+from os.path import isfile
 from copy import deepcopy
+import importlib
 
 from maps.attributs import *
 from Joueur import get_joueur_position_cell
@@ -32,9 +34,19 @@ class ObjetDialogue(py.sprite.Sprite):
         self.name = name or dialogue
         self.face = face or "vide.png"
         self.face = pygame.transform.scale(pygame.image.load("PNJs/faces/" + self.face), (WIDTH_FACE, HEIGHT_FACE))
-        self.dialogue = deepcopy(dialogues[dialogue])
+        self.dialogue = deepcopy(self.dialoguesID[dialogue])
         self.dialogueKey = dialogue
         self.radius = TILE_SIZE * 2
+    
+    dialoguesID = dialogues
+    @classmethod
+    def ready(cls, id):
+        if isfile("PNJs/dialogues" + str(id) + ".py"):
+            mod = importlib.import_module("PNJs.dialogues" + str(id))
+            cls.dialoguesID = mod.dialogues
+        else:
+            mod = importlib.import_module("PNJs.dialogues")
+            cls.dialoguesID = mod.dialogues
 
 class Item(py.sprite.Sprite):
     def __init__(self, x, y, name, layerIdx, mapName):
@@ -61,7 +73,7 @@ class Tile(py.sprite.Sprite):
         self.image = images[animations[self.animated]["tiles"][min(len(animations[self.animated]["tiles"]) - 1, floor(pygame.math.lerp(0, len(animations[self.animated]["tiles"]), self.time)))]]
 
 class Map(py.sprite.Sprite):
-    def __init__(self, x: int, y: int, path: str):
+    def __init__(self, id: int, x: int, y: int, path: str):
         super().__init__()
         self.images = setup_images("maps/" + FOLDER_PATH, "maps/" + TILE_MAP_FOLDER_NAME)
         self.rect = py.Rect(x, y, MapSize.width, MapSize.height)
@@ -69,7 +81,7 @@ class Map(py.sprite.Sprite):
         self.tile_map_attributs = self.load_map("maps/" + path + "/" + TILE_MAP_FILE_NAME)
         self.tile_map = self.load_map("maps/" + path + "/" + TILE_MAP_RELOADABLE_FILE_NAME)
         self.create_groups()
-        self.apply_attributs()
+        self.apply_attributs(id)
     
     def load_map(self, file_name):
         if os.path.isfile(file_name):
@@ -97,11 +109,12 @@ class Map(py.sprite.Sprite):
                             time = tile["special"]["time"]
                         Tile(x * TILE_SIZE, y * TILE_SIZE, self.images[tile["nom"]], animated, time, self.tile_groups[i][-1][math.floor(x / (GAME_SCREEN_WIDTH / TILE_SIZE))])
     
-    def apply_attributs(self):
+    def apply_attributs(self, id):
         self.collisions = extendedGroup()
         self.portes = extendedGroup()
         self.objetsDialogue = extendedGroup()
         self.items = extendedGroup()
+        ObjetDialogue.ready(id)
         for layerIdx, layer in enumerate(self.tile_map_attributs):
             for y, row in enumerate(layer):
                 for x, tile in enumerate(row):

@@ -9,7 +9,7 @@ RACINEDE2 = math.sqrt(2)
 
 
 class Joueur(py.sprite.Sprite):
-    def __init__(self, x, y, p_items, collectedItems, events=False):
+    def __init__(self, save_id, x, y, p_items, collectedItems, events=False, code=""):
         self.rect = py.Rect(0, 0, 50, 100)
         self.rect.center = (x, y)
 
@@ -36,7 +36,7 @@ class Joueur(py.sprite.Sprite):
         self.talkingFont = py.font.Font(size=32)
         self.talkPossible = False
 
-        self.evenements = events or Evenements()
+        self.evenements = events or Evenements(save_id)
 
         self.items = p_items
         self.collectedItems = collectedItems
@@ -53,6 +53,9 @@ class Joueur(py.sprite.Sprite):
         self.inventorySurface = py.Surface((GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT), py.SRCALPHA)
         self.inventorySurface.fill((0, 0, 0))
         self.inventorySurface.set_alpha(100)
+
+        self.code = code
+        self.codeFont = py.font.Font(size=64)
 
     def update(self, dt, keys_pressed_once, mapjeu, zoom: float):
         touchesAppuyes = py.key.get_pressed()
@@ -254,6 +257,10 @@ class Joueur(py.sprite.Sprite):
             for button in self.changeMenuTabButtons:
                 surface.blit(button["img"], button["rect"].topleft)
             self.menuTabs[self.menuTabsList[self.menuTab]](surface)
+        
+        if self.code:
+            textImg = self.codeFont.render(self.code, True, (0, 0, 255))
+            surface.blit(textImg, (WIDTH_FACE + 25, GAME_SCREEN_HEIGHT - HEIGHT_FACE))
     
     def drawInventaire(self, surface: py.Surface):
         i = 0

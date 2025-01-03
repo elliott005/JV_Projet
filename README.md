@@ -108,7 +108,3 @@ Suivez les instructions dans attributs.py.
 Pour modifier les parametres de la map:
 Trouvez le parametre que vous voulez modifier grace au commentaires (lignes commencant avec "#"). Ces commentaires expliquent ce que chaque paremetre fait.  
 Modifiez la valeur qui se trouve apres le "=". Si cette valeur se trouve entre guillemets, alors LAISSEZ LES GUILLEMETS, et rentrez ce que vous voulez entre. Sinon, cette valeur doit etre un nombre entier (ex: 12).
-
-## Pour avoir de l'aide:  
-
-Demandez sur le discord! :)
